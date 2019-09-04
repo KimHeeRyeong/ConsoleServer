@@ -27,10 +27,14 @@ int main() {
 	if (connect(hSocket, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
 		ErrorHandling("connect() error");
 
+	//recv서버가 보낼때까지 대기
 	strLen = recv(hSocket, message, sizeof(message) - 1, 0);
 	if (strLen == -1)
 		ErrorHandling("read() error!");
 	printf("Message from server:%s \n", message);
+	memset(message, 0, sizeof(message));
+	strcpy_s(message,sizeof("Hello Server!"), "Hello Server!");
+	send(hSocket, message, sizeof(message), 0);
 	closesocket(hSocket);
 	WSACleanup();
 	system("pause");

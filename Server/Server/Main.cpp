@@ -12,7 +12,7 @@ int main() {
 	SOCKADDR_IN servAddr, clntAddr;//주소
 
 	int szClntAddr;
-	char message[] = "Hello World!";
+	char message[30] = "Hello Client!";
 
 	//윈도우는 방화벽 존재하기 때문에
 	//WSAStartup을 이용해 해당 프로그램 사용 허가 요청
@@ -46,6 +46,12 @@ int main() {
 
 	//hClntSock 는 일종의 계정명, id (클라이언트 소켓과 서버의 클라이언트 소켓은 다름)
 	send(hClntSock, message, sizeof(message), 0);//flag 왠만하면 0 si쪽에서 많이 사용. 게임서버에서는 잘 사용 안함
+	memset(message, 0, sizeof(message));
+	int strLen = recv(hClntSock, message, sizeof(message) - 1, 0);
+	if (strLen == -1)
+		ErrorHandling("read() error!");
+	printf("Message from client:%s \n", message);
+
 	closesocket(hClntSock);
 	closesocket(hServSock);
 	WSACleanup();
