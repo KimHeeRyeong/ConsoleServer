@@ -12,7 +12,9 @@ int main() {
 	SOCKADDR_IN servAddr, clntAddr;//주소
 
 	int szClntAddr;
-	char message[30] = "Hello Client!";
+	char sendMsg[50] = "숫자 입력(종료는 0)";
+	char reciveMsg[100] = {0};
+	char message[100] = "숫자 입력(종료는 0)";
 
 	//윈도우는 방화벽 존재하기 때문에
 	//WSAStartup을 이용해 해당 프로그램 사용 허가 요청
@@ -45,13 +47,45 @@ int main() {
 		ErrorHandling("accept() error");
 
 	//hClntSock 는 일종의 계정명, id (클라이언트 소켓과 서버의 클라이언트 소켓은 다름)
-	send(hClntSock, message, sizeof(message), 0);//flag 왠만하면 0 si쪽에서 많이 사용. 게임서버에서는 잘 사용 안함
-	memset(message, 0, sizeof(message));
-	int strLen = recv(hClntSock, message, sizeof(message) - 1, 0);
-	if (strLen == -1)
-		ErrorHandling("read() error!");
-	printf("Message from client:%s \n", message);
+	while (1) {
+		//send 메세지
+		memset(sendMsg, 0, sizeof(sendMsg));
+		strcpy_s(sendMsg, sizeof("숫자 입력(종료는 0)"), "숫자 입력(종료는 0)");
+		send(hClntSock, sendMsg, sizeof(sendMsg), 0);//flag 왠만하면 0 si쪽에서 많이 사용. 게임서버에서는 잘 사용 안함
+		
+		//첫번째 숫자 받기
+		memset(reciveMsg, 0, sizeof(reciveMsg));
+		int strLen = recv(hClntSock, reciveMsg, sizeof(reciveMsg) - 1, 0);
+		if (strLen == -1)
+			ErrorHandling("read() error!");
+		printf("First number:%s \n", reciveMsg);
+		if (!strcmp(reciveMsg, "0")) {
+			printf("종료\n");
+			break;
+		}
+		int first = atoi(reciveMsg);
+		//send 메세지
+		send(hClntSock, sendMsg, sizeof(sendMsg), 0);
 
+		//두번째 숫자 받기
+		memset(reciveMsg, 0, sizeof(reciveMsg));
+		strLen = recv(hClntSock, reciveMsg, sizeof(reciveMsg) - 1, 0);
+		if (strLen == -1)
+			ErrorHandling("read() error!");
+		printf("Second number:%s \n", reciveMsg);
+		if (!strcmp(reciveMsg, "0")) {
+			printf("종료\n");
+			break;
+		}
+		int second = atoi(reciveMsg);
+
+		//결과 메세지
+		memset(sendMsg, 0, sizeof(sendMsg));
+		_itoa_s(first*second, sendMsg, 10);
+		printf("결과 : %s \n", sendMsg);
+		printf("==============\n");
+		send(hClntSock, sendMsg, sizeof(sendMsg), 0);
+	}
 	closesocket(hClntSock);
 	closesocket(hServSock);
 	WSACleanup();

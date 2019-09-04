@@ -8,8 +8,9 @@ int main() {
 	WSADATA wsaData;
 	SOCKET hSocket;
 	SOCKADDR_IN servAddr;
-
-	char message[30];
+	char sendMsg[50] = {0};
+	char reciveMsg[100] = {0};
+	char message[100];
 	int strLen;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
@@ -26,15 +27,47 @@ int main() {
 
 	if (connect(hSocket, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
 		ErrorHandling("connect() error");
+	while (1) {
+		//recv서버가 보낼때까지 대기
+		//메세지 받기
+		memset(reciveMsg, 0, sizeof(reciveMsg));
+		strLen = recv(hSocket, reciveMsg, sizeof(reciveMsg) - 1, 0);
+		if (strLen == -1)
+			ErrorHandling("read() error!");
+		printf("%s \n", reciveMsg);
 
-	//recv서버가 보낼때까지 대기
-	strLen = recv(hSocket, message, sizeof(message) - 1, 0);
-	if (strLen == -1)
-		ErrorHandling("read() error!");
-	printf("Message from server:%s \n", message);
-	memset(message, 0, sizeof(message));
-	strcpy_s(message,sizeof("Hello Server!"), "Hello Server!");
-	send(hSocket, message, sizeof(message), 0);
+		//첫번째 숫자 보내기
+		memset(sendMsg, 0, sizeof(sendMsg));
+		scanf_s("%s", sendMsg, sizeof(sendMsg));
+		send(hSocket, sendMsg, sizeof(sendMsg), 0);
+		if (!strcmp(sendMsg, "0")) {
+			printf("종료\n");
+			break;
+		}
+		//메세지 받기
+		memset(reciveMsg, 0, sizeof(reciveMsg));
+		strLen = recv(hSocket, reciveMsg, sizeof(reciveMsg) - 1, 0);
+		if (strLen == -1)
+			ErrorHandling("read() error!");
+		printf("%s \n", reciveMsg);
+
+		//두번째 숫자 보내기
+		memset(sendMsg, 0, sizeof(sendMsg));
+		scanf_s("%s", sendMsg, sizeof(sendMsg));
+		send(hSocket, sendMsg, sizeof(sendMsg), 0);
+		if (!strcmp(sendMsg, "0")) {
+			printf("종료\n");
+			break;
+		}
+
+		//결과 메세지 받기
+		memset(reciveMsg, 0, sizeof(reciveMsg));
+		strLen = recv(hSocket, reciveMsg, sizeof(reciveMsg) - 1, 0);
+		if (strLen == -1)
+			ErrorHandling("read() error!");
+		printf("결과값:%s \n", reciveMsg);
+		printf("==============\n");
+	}
 	closesocket(hSocket);
 	WSACleanup();
 	system("pause");
