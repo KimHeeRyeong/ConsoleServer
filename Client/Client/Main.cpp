@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <WinSock2.h>
 
-void ErrorHandling(char* message);
+void ErrorHandling(const char* message);
 
-int main(int argc, char* argv[]) {
+int main() {
 	WSADATA wsaData;
 	SOCKET hSocket;
 	SOCKADDR_IN servAddr;
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 
 	memset(&servAddr, 0, sizeof(servAddr));
 	servAddr.sin_family = AF_INET;
-	servAddr.sin_addr.s_addr = inet_addr("localhost");
+	servAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 	servAddr.sin_port = htons(10000);
 
 	if (connect(hSocket, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
